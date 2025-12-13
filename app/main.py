@@ -1,44 +1,43 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
+from typing import List
+
 from app.schemas import (
     WindowAnalysisResponse,
     ElevationResult,
     WindowGroup,
 )
 
+# -------------------------------------------------
+# App setup
+# -------------------------------------------------
 app = FastAPI(
     title="Streamline Windows AI",
     description="Micro backend for window quantity takeoff from elevation drawings",
     version="0.1.0",
 )
 
-# -------------------------
+# -------------------------------------------------
 # Health check
-# -------------------------
+# -------------------------------------------------
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
 
-# -------------------------
-# Windows analysis endpoint (MOCK for now)
-# -------------------------
+# -------------------------------------------------
+# Windows analysis (NO FILE UPLOAD – mock)
+# -------------------------------------------------
 @app.post(
     "/windows/analyse",
     response_model=WindowAnalysisResponse,
 )
 async def analyse_windows(project_id: str):
     """
-    Placeholder implementation.
-
-    Returns mock window quantities grouped by:
-    - floor
-    - elevation
-    - window size (mm)
-
-    AI vision + scale logic will replace this later.
+    Mock endpoint.
+    Returns window quantities grouped by floor, elevation, and size.
     """
 
-    mock_result = WindowAnalysisResponse(
+    return WindowAnalysisResponse(
         project_id=project_id,
         results=[
             ElevationResult(
@@ -63,4 +62,39 @@ async def analyse_windows(project_id: str):
         ],
     )
 
-    return mock_result
+
+# -------------------------------------------------
+# Windows analysis (WITH FILE UPLOAD – mock)
+# -------------------------------------------------
+@app.post(
+    "/windows/analyse/upload",
+    response_model=WindowAnalysisResponse,
+)
+async def analyse_windows_with_upload(
+    project_id: str,
+    floors: List[str],
+    elevations: List[str],
+    drawings: List[UploadFile] = File(...),
+):
+    """
+    Mock upload endpoint.
+    Accepts elevation drawings and returns placeholder window quantities.
+    """
+
+    return WindowAnalysisResponse(
+        project_id=project_id,
+        results=[
+            ElevationResult(
+                floor=floors[0] if floors else "Unknown Floor",
+                elevation=elevations[0] if elevations else "Unknown Elevation",
+                windows=[
+                    WindowGroup(size_mm="1200x1500", quantity=4),
+                ],
+            )
+        ],
+        notes=[
+            f"{len(drawings)} drawing(s) received",
+            "Visual count from elevation drawings",
+            "Sizes estimated from scale",
+        ],
+    )
