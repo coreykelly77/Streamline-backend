@@ -98,3 +98,10 @@ async def analyse_windows_with_upload(
             "Sizes estimated from scale",
         ],
     )
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "streamline-backend"}
